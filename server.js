@@ -1,74 +1,27 @@
-const express = require('express');
-const app = express();
+import express from "express"; //create API, served Front-End
+import cors from "cors"; // set up the commnuication rules between Front-End and Back-End
+import mongoose from "mongoose";
 
-const mongoose = require('mongoose');
+import { userRouter } from "./routes/user.js";
+import { appointmentsRouter } from "./routes/route_appointment.js";
 
-const ClassroomModel = require('./models/Classrooms.js');
 
+const app = express(); // a version of our API
 
-const cors = require('cors');
+app.use(express.json()); // the data got from the Front-End will be converted into JSON
 app.use(cors());
 
-app.use(express.json());
+app.use("/auth", userRouter); // applt the router
+app.use("/appointments", appointmentsRouter);
+app.use("/client_appointments", appointmentsRouter);
 
 mongoose.connect(
-    "mongodb+srv://41171123h:41171123hpassword@classroommanagement.6k7p0ah.mongodb.net/classroommanagement?retryWrites=true&w=majority",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true, 
-    }
+  "mongodb+srv://41171123h:41171123hB1@b1.3xjj9xw.mongodb.net/?retryWrites=true&w=majority",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
 );
-
-
-
-
-
-app.post('/addclassroom', async (req,res) => { 
-    const name = req.body.name;
-    const school = req.body.school;
-    const campus = req.body.campus;
-    const building = req.body.building;
-    const floor = req.body.floor;
-    
-    const classroom = new ClassroomModel({name:name , school:school , campus:campus , building:building , floor:floor});
-    await classroom.save();
-    res.send(classroom);
-});
-
-app.get('/read', async (req, res) => {
-    try {
-        const result = await ClassroomModel.find({});
-        res.send(result);
-    } catch (error) {
-        res.status(500).send(error);
-    }
-});
-
-
-app.put('/update', async (req, res) => {
-
-    const newFloor = req.body.newFloor;
-    const id = req.body.id;
-
-    try{
-        await ClassroomModel.findById(id, (error, classroomToUpdate) => { 
-            classroomToUpdate.floor = Number(newFloor);
-            classroomToUpdate.save();
-        });
-    }
-    catch(err){
-        console.log(err)
-    }
-    res.send("updated");
-});
-
-
-app.delete('/delete/:id', async (req, res) => {
-    const id = req.params.id;
-    await ClassroomModel.findByIdAndRemove(id).exec()
-    res.send("itemdeleted");
-})
-
 
 const port = process.env.PORT || 3001;
 // production script
